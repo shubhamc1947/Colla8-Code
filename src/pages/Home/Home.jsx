@@ -2,6 +2,7 @@
 import { Link,useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import "./Homepage.scss";
+import GuestLoginButton from '../../components/GuestLoginButton/GuestLoginButton';
 
 
 import { motion } from "framer-motion";
@@ -10,21 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import OptimizedVideo from "./Video";
 const Home = () => {
 
-  // const [joke, setjoke] = useState("Hello uncle");
-  // async function dadJokesApi() {
-  //   const data = await fetch("https://icanhazdadjoke.com/slack");
-  //   const fetching = data.json();
-  //   // const joke = fetching.then((data) => setjoke(data.attachments[0].text));
-  //   // console.log(joke)
-  //   // setjoke(joke);
-  // }
-
-  // useEffect(() => {
-  //   dadJokesApi();
-  // }, []);
-
   const location = useLocation();
-  // console.log(location)
   useEffect(() => {
     if (location.state?.message) {
       toast.error(location.state.message);
@@ -121,7 +108,6 @@ const initialAnimation = () => {
 
 useEffect(() => {
   initialAnimation();
-
 }, []);
 
   return (
@@ -133,15 +119,13 @@ useEffect(() => {
         <motion.div className="container">
           <motion.div className="textcont" variants={variants} initial="initial" animate="animate">
             <h1>Where Code Meets Collaboration.</h1>
-            <h2 style={{ color: "red" }}>
-              {/* {joke == "" ? <p>Loading...</p> : joke} */}
-            </h2>
             <h2>
               Solve, Teach, and Interview: The Online Code Editor for Every
               Occasion...
             </h2>
             <motion.h3  variants={variants} animate="btn">
               <Link to={"/createRoom"} className="sharebtn" variants={variants} animate="btn" >Create New Room</Link>
+              <GuestLoginButton />
             </motion.h3>
           </motion.div>
         </motion.div>

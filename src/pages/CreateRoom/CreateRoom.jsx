@@ -30,7 +30,7 @@ const CreateRoom = () => {
       <form autoComplete='off'>
         <div className='inputgroup'>
           <label htmlFor="roomId">Room Id ...</label>
-          <input type="text" name="roomId" id="roomId" placeholder='Enter Room ID' value={roomId} onChange={e => setRoomId(e.target.value)} />
+          <input type="text" name="roomId" id="roomId" placeholder='Enter Existing Room ID' value={roomId} onChange={e => setRoomId(e.target.value)} />
         </div>
         <div className='inputgroup'>
           <input type="submit" onClick={joinRoom} value="Enter Room" />
