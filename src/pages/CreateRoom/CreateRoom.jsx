@@ -7,7 +7,18 @@ import {toast} from 'react-toastify';
 const CreateRoom = () => {
   const navigate = useNavigate();
   const [roomId, setRoomId] = useState("");
+  const cachedRoomId = localStorage.getItem("cachedRoomId");
 
+<<<<<<< Updated upstream
+=======
+  useEffect(() => {
+    if (cachedRoomId) {
+      localStorage.removeItem("cachedRoomId");
+      navigate(`/editor/${cachedRoomId}`);
+    }
+  }, []);
+
+>>>>>>> Stashed changes
   const joinRoom = (e) => {
     e.preventDefault();
     if (roomId === "") {
