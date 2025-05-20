@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { v4 as id } from 'uuid';
 import { useNavigate } from 'react-router-dom';
 import './CreateRoom.scss';
@@ -8,6 +8,16 @@ const CreateRoom = () => {
   const navigate = useNavigate();
   const [roomId, setRoomId] = useState("");
 
+  useEffect(() => {
+    setTimeout(() => {
+      const cachedRoomId = localStorage.getItem("cachedRoomId");
+      if (cachedRoomId) {
+        const parsedId = JSON.parse(cachedRoomId);
+        localStorage.removeItem("cachedRoomId"); 
+        navigate(`editor/${parsedId}`)
+      }
+    }, 2000);
+  },[])
   const joinRoom = (e) => {
     e.preventDefault();
     if (roomId === "") {
@@ -30,7 +40,7 @@ const CreateRoom = () => {
       <form autoComplete='off'>
         <div className='inputgroup'>
           <label htmlFor="roomId">Room Id ...</label>
-          <input type="text" name="roomId" id="roomId" placeholder='Enter Room ID' value={roomId} onChange={e => setRoomId(e.target.value)} />
+          <input type="text" name="roomId" id="roomId" placeholder='Enter Existing Room ID' value={roomId} onChange={e => setRoomId(e.target.value)} />
         </div>
         <div className='inputgroup'>
           <input type="submit" onClick={joinRoom} value="Enter Room" />

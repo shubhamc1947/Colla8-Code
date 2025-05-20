@@ -1,0 +1,25 @@
+.guest-login-btn {
+    background-color: #6096B4;;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: .25rem;
+    box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+    color: white;
+    cursor: pointer;
+    display: inline-flex;
+    transition: all 250ms;
+    width: auto;
+    font-size: 1.2rem;
+  }
+  
+  .guest-login-btn:hover {
+    border-color: rgba(0, 0, 0, 0.15);
+    box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+  }
+  
+  .guest-login-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
