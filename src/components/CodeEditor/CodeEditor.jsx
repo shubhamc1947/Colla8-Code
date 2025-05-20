@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './CodeEditor.scss';
 import CodeMirror from '@uiw/react-codemirror';
+import axios from 'axios';
 
 //tooltip
-
 import { Tooltip } from 'react-tooltip'
 import 'react-tooltip/dist/react-tooltip.css'
-
 
 // languages
 import { javascript } from '@codemirror/lang-javascript';
@@ -49,6 +48,19 @@ const languages = {
   php: php,
 };
 
+// Helper function to get file extension for the API call
+const getFileExtension = (lang) => {
+  const extensions = {
+    javascript: 'js',
+    cpp: 'cpp',
+    java: 'java',
+    python: 'py',
+    rust: 'rs',
+    php: 'php'
+  };
+  return extensions[lang] || lang;
+};
+
 const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
   const [tabs, setTabs] = useState([
     {
@@ -56,11 +68,14 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
       heading: 'Coding heading one',
       code: "function (){console.log('hello')}",
       lang: 'javascript',
+      input: '', // Added for code execution
     },
   ]);
   const [isActiveId, setIsActiveId] = useState(1);
   const [theme, setTheme] = useState('dracula');
-
+  const [output, setOutput] = useState('');
+  const [showOutput, setShowOutput] = useState(false);
+  
   useEffect(() => {
     const handleCodeChange = (msg) => {
       if (Array.isArray(msg)) {
@@ -105,6 +120,17 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
     });
   };
   
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setTabs((prevTabs) => {
+      const codingText = prevTabs.map((tab) =>
+        tab.id === isActiveId ? { ...tab, input: value } : tab
+      );
+      socketRef.current.emit(ACTIONS.CODE_CHANGE, {roomId,codingText});
+      onCodeChange(codingText);
+      return codingText;
+    });
+  };
 
   const addTab = () => {
     const newId = tabs.length > 0 ? tabs[tabs.length - 1].id + 1 : 1;
@@ -113,6 +139,7 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
       heading: `Coding heading ${newId}`,
       code: '',
       lang: 'javascript',
+      input: '',
     };
     setTabs((prevTabs)=>{
       const codingText=[...prevTabs, newTab];
@@ -156,6 +183,33 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
     toast.success("File Download Successfully");
   };
 
+  const runCode = async () => {
+    const activeTab = tabs.find((tab) => tab.id === isActiveId);
+    setShowOutput(true);
+    setOutput("Running code...");
+    
+    try {
+      const { data } = await axios.post("https://emkc.org/api/v2/piston/execute", {
+        language: activeTab.lang,
+        version: "*",
+        files: [
+          {
+            name: `main.${getFileExtension(activeTab.lang)}`,
+            content: activeTab.code
+          }
+        ],
+        stdin: activeTab.input
+      });
+      const outputText = data.run.output || "No output";
+      setOutput(outputText);
+      toast.success("Code executed successfully!");
+    } catch (error) {
+      toast.error("Execution failed");
+      setOutput(error.message || "Execution failed");
+      console.error(error);
+    }
+  };
+
   // console.log(tabs)
   const activeTab = Array.isArray(tabs) ? tabs.find((tab) => tab.id === isActiveId) : null;
 
@@ -185,7 +239,13 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
               ))}
             </select>
           </div>
-          <button onClick={downloadFile} data-tooltip-place="bottom-end" data-tooltip-id="downloadbtn" data-tooltip-content="Download Code" ><i className="fa-solid fa-download"></i></button>
+          <button onClick={runCode} data-tooltip-place="bottom-end" data-tooltip-id="runbtn" data-tooltip-content="Run Code">
+            <i className="fa-solid fa-play"></i>
+          </button>
+          <button onClick={downloadFile} data-tooltip-place="bottom-end" data-tooltip-id="downloadbtn" data-tooltip-content="Download Code">
+            <i className="fa-solid fa-download"></i>
+          </button>
+          <Tooltip style={{ backgroundColor: "white", color: "#333" }} id="runbtn" />
           <Tooltip style={{ backgroundColor: "white", color: "#333" }} id="downloadbtn" />
         </div>
       </div>
@@ -204,12 +264,37 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
           </div>
           {activeTab && (
             <div className="tabinfo active">
-              <CodeMirror
-                value={activeTab.code}
-                theme={themes[theme].theme}
-                extensions={[languages[activeTab.lang] && languages[activeTab.lang]()]}
-                onChange={(value) => handleTextValue(value)}
-              />
+              <div className={`codecontainer ${showOutput ? 'with-output' : ''}`}>
+                <CodeMirror
+                  value={activeTab.code}
+                  theme={themes[theme].theme}
+                  extensions={[languages[activeTab.lang] && languages[activeTab.lang]()]}
+                  onChange={(value) => handleTextValue(value)}
+                />
+              </div>
+              
+              {showOutput && (
+                <div className="output-container">
+                  <div className="output-header">
+                    <h3>Output</h3>
+                    <button onClick={() => setShowOutput(false)} className="close-output">
+                      <i className="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                  <div className="input-section">
+                    <h4>Input</h4>
+                    <textarea 
+                      value={activeTab.input || ''} 
+                      onChange={handleInputChange}
+                      placeholder="Standard input for your program"
+                    />
+                  </div>
+                  <div className="output-section">
+                    <h4>Console</h4>
+                    <pre>{output}</pre>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
