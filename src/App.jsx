@@ -1,13 +1,10 @@
-// src/App.js
-
-import React from "react";
 import { Analytics } from "@vercel/analytics/react"
 import {
   Route,
   Routes,
   BrowserRouter as Router,
 } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Home from "./pages/Home/Home";
 import LoginPage from "./pages/LoginPage/LoginPage";
@@ -19,12 +16,14 @@ import CreateRoom from './pages/CreateRoom/CreateRoom';
 import { AuthProvider } from "./contexts/AuthContext";
 // import { compileString } from "sass";
 import CodeTab from "./components/CodeTab/CodeTab";
+import GuestBanner from "./components/GuestBanner/GuestBanner";
 
 function App() {
   return (
     <Router>
       <AuthProvider>
         <NavBar />
+        <GuestBanner/>
         <Routes>
         <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
@@ -32,7 +31,7 @@ function App() {
           <Route path="/createRoom" element={<Auth compo={CreateRoom}  />} />
 
           <Route path="/editor/:roomId" element={<RoomPage />} />
-          <Route path="/test" element={<CodeTab />} />
+          {/* <Route path="/test" element={<CodeTab />} /> */}
           
         </Routes>
       </AuthProvider>
