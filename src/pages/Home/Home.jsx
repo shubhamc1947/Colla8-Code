@@ -12,6 +12,7 @@ import OptimizedVideo from "./Video";
 const Home = () => {
 
   const location = useLocation();
+  const isLoggedin = !!localStorage.getItem("username");
   useEffect(() => {
     if (location.state?.message) {
       toast.error(location.state.message);
@@ -125,7 +126,7 @@ useEffect(() => {
             </h2>
             <motion.h3  variants={variants} animate="btn">
               <Link to={"/createRoom"} className="sharebtn" variants={variants} animate="btn" >Create New Room</Link>
-              <GuestLoginButton />
+              {!isLoggedin && <GuestLoginButton />}
             </motion.h3>
           </motion.div>
         </motion.div>

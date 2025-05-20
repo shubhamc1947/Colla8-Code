@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { v4 as id } from 'uuid';
 import { useNavigate } from 'react-router-dom';
 import './CreateRoom.scss';
@@ -8,6 +8,16 @@ const CreateRoom = () => {
   const navigate = useNavigate();
   const [roomId, setRoomId] = useState("");
 
+  useEffect(() => {
+    setTimeout(() => {
+      const cachedRoomId = localStorage.getItem("cachedRoomId");
+      if (cachedRoomId) {
+        const parsedId = JSON.parse(cachedRoomId);
+        localStorage.removeItem("cachedRoomId"); 
+        navigate(`editor/${parsedId}`)
+      }
+    }, 2000);
+  },[])
   const joinRoom = (e) => {
     e.preventDefault();
     if (roomId === "") {
