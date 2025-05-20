@@ -9,9 +9,7 @@ const CreateRoom = () => {
   const [roomId, setRoomId] = useState("");
   const cachedRoomId = localStorage.getItem("cachedRoomId");
 
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
+
   useEffect(() => {
     if (cachedRoomId) {
       localStorage.removeItem("cachedRoomId");
@@ -19,19 +17,7 @@ const CreateRoom = () => {
     }
   }, []);
 
->>>>>>> Stashed changes
-=======
-  useEffect(() => {
-    setTimeout(() => {
-      const cachedRoomId = localStorage.getItem("cachedRoomId");
-      if (cachedRoomId) {
-        const parsedId = JSON.parse(cachedRoomId);
-        localStorage.removeItem("cachedRoomId"); 
-        navigate(`editor/${parsedId}`)
-      }
-    }, 2000);
-  },[])
->>>>>>> b07f154b881d78d174a6bd21618fd56a09682534
+
   const joinRoom = (e) => {
     e.preventDefault();
     if (roomId === "") {
