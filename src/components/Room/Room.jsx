@@ -24,11 +24,21 @@ const Room = () => {
   const codeRef = useRef([
     {
       id: 1,
-      heading: 'Coding heading one',
-      code: "function (){console.log('hello')}",
-      lang: 'javascript',
+      heading: "New Code",
+      code: `// JavaScript Boilerplate
+function main() {
+  console.log("Hello, World!");
+  
+  // Your code here
+  
+  return 0;
+}
+
+main();`,
+      lang: "javascript",
+      input: "",
     },
-  ]); 
+  ])
   const { roomId } = useParams();
   const reactNavigator = useNavigate();
   const location = useLocation();
