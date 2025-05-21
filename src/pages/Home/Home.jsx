@@ -1,17 +1,20 @@
 // src/pages/Home/Home.js
 import { Link,useLocation } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+import  { useEffect } from "react";
 import "./Homepage.scss";
 import GuestLoginButton from '../../components/GuestLoginButton/GuestLoginButton';
 
 
 import { motion } from "framer-motion";
 
-import { ToastContainer, toast } from 'react-toastify';
+import {  toast } from 'react-toastify';
 import OptimizedVideo from "./Video";
+import { useAuth } from "../../contexts/AuthContext";
 const Home = () => {
 
   const location = useLocation();
+  const { loading } = useAuth();
+  const createRoomUrl = loading ? "#" : "/createRoom";
   const isLoggedin = !!localStorage.getItem("username");
   useEffect(() => {
     if (location.state?.message) {
@@ -125,7 +128,7 @@ useEffect(() => {
               Occasion...
             </h2>
             <motion.h3  variants={variants} animate="btn">
-              <Link to={"/createRoom"} className="sharebtn" variants={variants} animate="btn" >Create New Room</Link>
+              <Link  to={"/createRoom"} className="sharebtn" variants={variants} animate="btn" >Create New Room</Link>
               {!isLoggedin && <GuestLoginButton />}
             </motion.h3>
           </motion.div>

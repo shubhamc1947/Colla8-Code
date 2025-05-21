@@ -17,6 +17,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 // import { compileString } from "sass";
 import CodeTab from "./components/CodeTab/CodeTab";
 import GuestBanner from "./components/GuestBanner/GuestBanner";
+import NotFound from "./pages/NotFound/NotFound";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/createRoom" element={<Auth compo={CreateRoom}  />} />
 
           <Route path="/editor/:roomId" element={<RoomPage />} />
+          <Route path="*" element={<NotFound />} />
           {/* <Route path="/test" element={<CodeTab />} /> */}
           
         </Routes>
