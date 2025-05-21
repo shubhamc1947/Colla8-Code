@@ -18,6 +18,9 @@
 * [ ] **Auto Logout Mechanism**
   Implement frontend-based **auto-logout** after a set idle timeout (e.g., 15–30 mins). Consider using libraries like `idle-timer`.
 
+* [ ] **Email Notification on Login (EmailJS)**
+  Integrate **EmailJS** to send real-time email notifications whenever a user logs in.
+
 ---
 
 ## 🐛 Bug Fixes
