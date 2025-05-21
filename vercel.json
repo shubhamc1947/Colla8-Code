@@ -1,0 +1,26 @@
+{
+    "rewrites": [
+        {
+            "src": "/",
+            "dest": "/"
+        },
+        {
+            "src": "/login",
+            "dest": "/"
+        },
+        {
+            "src": "/register",
+            "dest": "/"
+        },
+        {
+            "src": "/createRoom",
+            "dest": "/"
+        },
+        {
+            "src": "/editor/:roomId",
+            "dest": "/"
+        }
+      
+    ]
+  }
+  
