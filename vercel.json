@@ -2,27 +2,27 @@
     "routes": [
       {
         "src": "/login",
-        "dest": "/index.html"
+        "dest": "/"
       },
       {
         "src": "/register",
-        "dest": "/index.html"
+        "dest": "/"
       },
       {
         "src": "/createRoom",
-        "dest": "/index.html"
+        "dest": "/"
       },
       {
         "src": "/editor/(?<roomId>[^/]+)",
-        "dest": "/index.html"
+        "dest": "/"
       },
       {
         "src": "/",
-        "dest": "/index.html"
+        "dest": "/"
       },
       {
         "src": "/.*",
-        "dest": "/index.html"
+        "dest": "/"
       }
     ]
   }
