@@ -8,10 +8,6 @@ const CreateRoom = () => {
   const navigate = useNavigate();
   const [roomId, setRoomId] = useState("");
   const cachedRoomId = localStorage.getItem("cachedRoomId");
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 
   useEffect(() => {
     if (cachedRoomId) {
@@ -20,10 +16,6 @@ const CreateRoom = () => {
     }
   }, []);
 
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
   const joinRoom = (e) => {
     e.preventDefault();
     if (roomId === "") {
