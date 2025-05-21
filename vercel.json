@@ -1,26 +1,29 @@
 {
-    "rewrites": [
-        {
-            "src": "/",
-            "dest": "/"
-        },
-        {
-            "src": "/login",
-            "dest": "/"
-        },
-        {
-            "src": "/register",
-            "dest": "/"
-        },
-        {
-            "src": "/createRoom",
-            "dest": "/"
-        },
-        {
-            "src": "/editor/:roomId",
-            "dest": "/"
-        }
-      
+    "routes": [
+      {
+        "src": "/login",
+        "dest": "/index.html"
+      },
+      {
+        "src": "/register",
+        "dest": "/index.html"
+      },
+      {
+        "src": "/createRoom",
+        "dest": "/index.html"
+      },
+      {
+        "src": "/editor/(?<roomId>[^/]+)",
+        "dest": "/index.html"
+      },
+      {
+        "src": "/",
+        "dest": "/index.html"
+      },
+      {
+        "src": "/.*",
+        "dest": "/index.html"
+      }
     ]
   }
   
