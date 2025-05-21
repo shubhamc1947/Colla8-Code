@@ -128,7 +128,7 @@ useEffect(() => {
               Occasion...
             </h2>
             <motion.h3  variants={variants} animate="btn">
-              <Link  to={"/createRoom"} className="sharebtn" variants={variants} animate="btn" >Create New Room</Link>
+              <Link  to={createRoomUrl} className="sharebtn" variants={variants} animate="btn" >Create New Room</Link>
               {!isLoggedin && <GuestLoginButton />}
             </motion.h3>
           </motion.div>
