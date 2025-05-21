@@ -1,3 +1,194 @@
-.notfound{
+.notfound {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 60px);
+    background-color: #282c34;
+    color: #ffffff;
+    font-family: 'Fira Code', monospace;
+    padding: 1rem; /* Updated padding */
     
-}
+    .notfound-content {
+      max-width: 500px; /* Updated max-width */
+      text-align: center;
+      animation: fadeIn 0.5s ease;
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .error-code {
+        font-size: 8rem; /* Updated font-size */
+        font-weight: 700;
+        color: #fff;
+        line-height: 1;
+        margin-bottom: 1.5rem; /* Updated margin-bottom */
+        position: relative;
+        
+        &::before, &::after {
+          content: '<>';
+          position: absolute;
+          font-size: 2rem;
+          color: #71d5b4;
+          opacity: 0.5;
+        }
+        
+        &::before {
+          left: -3rem;
+          top: 2rem;
+          transform: rotate(-20deg);
+        }
+        
+        &::after {
+          right: -3rem;
+          bottom: 2rem;
+          transform: rotate(20deg);
+        }
+      }
+      
+      .error-text {
+        margin-bottom: 2rem;
+        
+        h1 {
+          font-size: 2.5rem;
+          margin-bottom: 1rem;
+          color: #abb2bf;
+        }
+        
+        p {
+          font-size: 1.1rem;
+          color: #6c7693;
+          max-width: 600px;
+          margin: 0 auto;
+          line-height: 1.6;
+        }
+      }
+      
+      .code-snippet {
+        background-color: #282c34;
+        border-radius: 8px;
+        padding: 1.5rem; /* Updated padding */
+        margin-bottom: 1.5rem; /* Updated margin-bottom */
+        text-align: left;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        border: 1px solid #3e4451;
+        position: relative;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 30px;
+          background: linear-gradient(to bottom, #323842, transparent);
+          border-radius: 8px 8px 0 0;
+          pointer-events: none;
+        }
+        
+        pre {
+          margin: 0;
+          font-family: 'Fira Code', monospace;
+          font-size: 1rem;
+          line-height: 1.6;
+          overflow-x: auto;
+          
+          code {
+            .keyword {
+              color: #c678dd; // Purple for keywords
+            }
+            
+            .string {
+              color: #98c379; // Green for strings
+            }
+            
+            .comment {
+              color: #5c6370; // Gray for comments
+            }
+          }
+        }
+      }
+      
+      .home-button {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background-color: #FFFFFF;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: .25rem;
+        box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+        color: rgba(0, 0, 0, 0.85);
+        cursor: pointer;
+        display: inline-flex;
+        transition: all 250ms;
+        width: auto;
+        font-size: 1.2rem;
+        &:hover {
+            border-color: rgba(0, 0, 0, 0.15);
+            box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+            color: rgba(0, 0, 0, 0.65);
+        }
+        
+        &:active {
+          transform: translateY(1px);
+          box-shadow: none;
+        }
+        
+        i {
+          font-size: 1.1rem;
+        }
+      }
+    }
+    
+    // Responsive styles
+    @media (max-width: 768px) {
+      .notfound-content {
+        .error-code {
+          font-size: 6rem;
+          
+          &::before, &::after {
+            font-size: 1.5rem;
+          }
+          
+          &::before {
+            left: -2rem;
+          }
+          
+          &::after {
+            right: -2rem;
+          }
+        }
+        
+        .error-text {
+          h1 {
+            font-size: 2rem;
+          }
+          
+          p {
+            font-size: 1rem;
+          }
+        }
+        
+        .code-snippet {
+          padding: 1rem;
+          
+          pre {
+            font-size: 0.9rem;
+          }
+        }
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .notfound-content {
+        .error-code {
+          font-size: 6rem; /* Updated font-size */
+        }
+        
+        .code-snippet {
+          display: none; /* Hide code snippet on very small screens */
+        }
+      }
+    }
+  }
+  
