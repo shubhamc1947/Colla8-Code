@@ -8,7 +8,10 @@ import "./NavBar.scss";
 import { motion } from "framer-motion"
 
 const NavBar = () => {
-  const { authState, logoutHandler ,loading} = useContext(AuthContext);
+  const { authState, logoutHandler, loading } = useContext(AuthContext);
+  const loginUrl = loading ? "#" : "/login";
+  const registerUrl = loading ? "#" : "/register";
+  
   // console.log(authState);
 
   //framer motion varient
@@ -36,8 +39,8 @@ const NavBar = () => {
       ) : (
         <>
           <span>
-            <Link to="/register">Register</Link>
-            <Link to="/login">Login</Link>
+            <Link to={registerUrl}>Register</Link>
+            <Link to={loginUrl}>Login</Link>
           </span>
         </>
       )}
