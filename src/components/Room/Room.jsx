@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect, useRef } from "react"
 //tooltip
 
@@ -15,9 +13,28 @@ import ACTIONS from "../../Actions"
 import { toast } from "react-toastify"
 import "./Room.scss"
 
+// Helper functions for sessionStorage
+const saveToSessionStorage = (key, value) => {
+  try {
+    sessionStorage.setItem(key, JSON.stringify(value))
+  } catch (error) {
+    console.error(`Error saving to sessionStorage (${key}):`, error)
+  }
+}
+
+const loadFromSessionStorage = (key, defaultValue = null) => {
+  try {
+    const item = sessionStorage.getItem(key)
+    return item ? JSON.parse(item) : defaultValue
+  } catch (error) {
+    console.error(`Error loading from sessionStorage (${key}):`, error)
+    return defaultValue
+  }
+}
+
 const Room = () => {
   //
-  const username = localStorage.getItem("username")
+  const username = sessionStorage.getItem("username") || localStorage.getItem("username")
 
   const socketRef = useRef(null)
   const codeRef = useRef([
@@ -45,6 +62,14 @@ main();`,
   const [showShareModal, setShowShareModal] = useState(false)
   const shareUrlRef = useRef(null)
 
+  // Load saved code on component mount
+  useEffect(() => {
+    const savedTabs = loadFromSessionStorage("codeTabs")
+    if (savedTabs && Array.isArray(savedTabs) && savedTabs.length > 0) {
+      codeRef.current = savedTabs
+    }
+  }, [])
+
   useEffect(() => {
     const init = async () => {
       socketRef.current = await initSocket()
@@ -64,7 +89,7 @@ main();`,
       })
 
       socketRef.current.on(ACTIONS.JOINED, ({ clients, username, socketId, userSocketMap }) => {
-        if (username !== localStorage.getItem("username")) {
+        if (username !== (sessionStorage.getItem("username") || localStorage.getItem("username"))) {
           toast.success(`${username} joined the room.`)
         }
 
@@ -107,6 +132,9 @@ main();`,
   }
 
   function leaveRoom() {
+    sessionStorage.removeItem("activeTabId");
+    sessionStorage.removeItem("codeTabs");
+    sessionStorage.removeItem("codeTheme");
     reactNavigator("/")
   }
 
@@ -164,7 +192,14 @@ main();`,
     setShowShareModal(false)
   }
 
-  if (!localStorage.getItem("username")) {
+  // Handle code changes from CodeEditor
+  const handleCodeChange = (code) => {
+    codeRef.current = code
+    // Save to sessionStorage whenever code changes
+    saveToSessionStorage("codeTabs", code)
+  }
+
+  if (!sessionStorage.getItem("username") && !localStorage.getItem("username")) {
     return <Navigate to="/" />
   }
 
@@ -176,7 +211,7 @@ main();`,
             {clientList.map((client, idx) => (
               <ClientLogo
                 data-tooltip-id={idx + 500}
-                data-tooltip-content="Hello world!"
+                data-tooltip-content={client.username}
                 key={client.socketId}
                 username={client.username}
               />
@@ -208,9 +243,7 @@ main();`,
           <CodeEditor
             socketRef={socketRef}
             roomId={roomId}
-            onCodeChange={(code) => {
-              codeRef.current = code
-            }}
+            onCodeChange={handleCodeChange}
           />
         </div>
       </div>

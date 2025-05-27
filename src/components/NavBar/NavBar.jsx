@@ -7,6 +7,7 @@ import "./NavBar.scss";
 //framer motion
 import { motion } from "framer-motion"
 import { toast } from "react-toastify";
+import { navBarVarient } from "../../utils/motionVarients";
 
 const NavBar = () => {
   const { authState, logoutHandler, loading } = useContext(AuthContext);
@@ -16,20 +17,7 @@ const NavBar = () => {
   // console.log(authState);
 
   //framer motion varient
-  const variants={
-    initial:{
-      y:-100,
-      opacity:0
-    },
-    animate:{
-      y:0,
-      opacity:1,
-      transition:{
-        duration:1,
-        delay:0.3
-      }
-    }
-  }
+
   useEffect(() => {
       let timeout;
       if (loading) {
@@ -45,7 +33,7 @@ const NavBar = () => {
     }
   }, []);
   return (
-    <motion.nav className="navbar" variants={variants} initial="initial" animate="animate">
+    <motion.nav className="navbar" variants={navBarVarient} initial="initial" animate="animate">
       <Link to="/"><h1>CollabCode<span>.</span></h1></Link>
       {authState.username ? (
         <>

@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import "./CodeEditor.scss"
 import CodeMirror from "@uiw/react-codemirror"
@@ -9,111 +7,11 @@ import axios from "axios"
 import { Tooltip } from "react-tooltip"
 import "react-tooltip/dist/react-tooltip.css"
 
-// languages
-import { javascript } from "@codemirror/lang-javascript"
-import { cpp } from "@codemirror/lang-cpp"
-import { java } from "@codemirror/lang-java"
-import { python } from "@codemirror/lang-python"
-import { rust } from "@codemirror/lang-rust"
-import { php } from "@codemirror/lang-php"
-// themes
-import { okaidia } from "@uiw/codemirror-theme-okaidia"
-import { dracula } from "@uiw/codemirror-theme-dracula"
-import { solarizedLight } from "@uiw/codemirror-theme-solarized"
-import { githubLight } from "@uiw/codemirror-theme-github"
-import { material } from "@uiw/codemirror-theme-material"
-import { monokai } from "@uiw/codemirror-theme-monokai"
-import { nord } from "@uiw/codemirror-theme-nord"
-import { darcula } from "@uiw/codemirror-theme-darcula"
-import { eclipse } from "@uiw/codemirror-theme-eclipse"
+
 import ACTIONS from "../../Actions"
 import { toast } from "react-toastify"
+import { boilerplateCode, languages, themes } from "../../../apis/utils/data"
 
-const themes = {
-  okaidia: { theme: okaidia, mode: "dark" },
-  dracula: { theme: dracula, mode: "dark" },
-  material: { theme: material, mode: "dark" },
-  monokai: { theme: monokai, mode: "dark" },
-  nord: { theme: nord, mode: "dark" },
-  darcula: { theme: darcula, mode: "dark" },
-  githubLight: { theme: githubLight, mode: "light" },
-  solarizedLight: { theme: solarizedLight, mode: "light" },
-  eclipse: { theme: eclipse, mode: "light" },
-}
-
-const languages = {
-  javascript: javascript,
-  cpp: cpp,
-  java: java,
-  python: python,
-  rust: rust,
-  php: php,
-}
-
-// Boilerplate code for each language
-const boilerplateCode = {
-  javascript: `// JavaScript Boilerplate
-function main() {
-  console.log("Hello, World!");
-  
-  // Your code here
-  
-  return 0;
-}
-
-main();`,
-  cpp: `// C++ Boilerplate
-#include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
-
-using namespace std;
-
-int main() {
-  cout << "Hello, World!" << endl;
-  
-  // Your code here
-  
-  return 0;
-}`,
-  java: `// Java Boilerplate
-public class Main {
-  public static void main(String[] args) {
-    System.out.println("Hello, World!");
-    
-    // Your code here
-  }
-}`,
-  python: `# Python Boilerplate
-def main():
-    print("Hello, World!")
-    
-    # Your code here
-    
-    return 0
-
-if __name__ == "__main__":
-    main()`,
-  rust: `// Rust Boilerplate
-fn main() {
-    println!("Hello, World!");
-    
-    // Your code here
-}`,
-  php: `<?php
-// PHP Boilerplate
-function main() {
-    echo "Hello, World!";
-    
-    // Your code here
-    
-    return 0;
-}
-
-main();
-?>`,
-}
 
 // Helper function to get color for language indicator
 const getLangColor = (lang) => {
@@ -141,64 +39,97 @@ const getFileExtension = (lang) => {
   return extensions[lang] || lang
 }
 
+// Helper functions for sessionStorage
+const saveToSessionStorage = (key, value) => {
+  try {
+    sessionStorage.setItem(key, JSON.stringify(value))
+  } catch (error) {
+    console.error(`Error saving to sessionStorage (${key}):`, error)
+  }
+}
+
+const loadFromSessionStorage = (key, defaultValue = null) => {
+  try {
+    const item = sessionStorage.getItem(key)
+    return item ? JSON.parse(item) : defaultValue
+  } catch (error) {
+    console.error(`Error loading from sessionStorage (${key}):`, error)
+    return defaultValue
+  }
+}
+
 const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
-  // Update the initial tab state to use the proper JavaScript boilerplate
-  const [tabs, setTabs] = useState(() => {
-    // Try to load from localStorage first
-    const savedTabs = localStorage.getItem("codeTabs")
-    if (savedTabs) {
-      try {
-        return JSON.parse(savedTabs)
-      } catch (e) {
-        console.error("Error parsing saved tabs:", e)
-      }
-    }
+  // Initialize state with default values first
+  const [tabs, setTabs] = useState([
+    {
+      id: 1,
+      heading: "New Code",
+      code: boilerplateCode.javascript,
+      lang: "javascript",
+      input: "",
+    },
+  ])
 
-    // Default tab if nothing in localStorage
-    return [
-      {
-        id: 1,
-        heading: "New Code",
-        code: boilerplateCode.javascript,
-        lang: "javascript",
-        input: "",
-      },
-    ]
-  })
-
-  // Update the theme state to use localStorage
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("codeTheme") || "dracula"
-  })
-
-  // Update isActiveId to use localStorage
-  const [isActiveId, setIsActiveId] = useState(() => {
-    const savedActiveId = localStorage.getItem("activeTabId")
-    return savedActiveId ? Number.parseInt(savedActiveId, 10) : 1
-  })
+  const [theme, setTheme] = useState("dracula")
+  const [isActiveId, setIsActiveId] = useState(1)
   const [output, setOutput] = useState("")
-  const [showOutput, setShowOutput] = useState(true) // Always show output panel in new layout
+  const [showOutput, setShowOutput] = useState(true)
   const [isRunning, setIsRunning] = useState(false)
   const [previousLang, setPreviousLang] = useState("javascript")
+  const [isInitialized, setIsInitialized] = useState(false)
 
-  // Add useEffect to save to localStorage whenever tabs or theme changes
+  // Load saved data on component mount
   useEffect(() => {
-    localStorage.setItem("codeTabs", JSON.stringify(tabs))
-  }, [tabs])
+    const loadSavedData = () => {
+      // Load theme
+      const savedTheme = loadFromSessionStorage("codeTheme", "dracula")
+      setTheme(savedTheme)
 
-  useEffect(() => {
-    localStorage.setItem("codeTheme", theme)
-  }, [theme])
+      // Load tabs
+      const savedTabs = loadFromSessionStorage("codeTabs")
+      if (savedTabs && Array.isArray(savedTabs) && savedTabs.length > 0) {
+        setTabs(savedTabs)
+        
+        // Load active tab ID
+        const savedActiveId = loadFromSessionStorage("activeTabId", savedTabs[0].id)
+        const validActiveId = savedTabs.find(tab => tab.id === savedActiveId) 
+          ? savedActiveId 
+          : savedTabs[0].id
+        setIsActiveId(validActiveId)
+      }
 
-  // Add useEffect to save active tab ID
+      setIsInitialized(true)
+    }
+
+    loadSavedData()
+  }, [])
+
+  // Save tabs to sessionStorage whenever tabs change (but only after initialization)
   useEffect(() => {
-    localStorage.setItem("activeTabId", isActiveId.toString())
-  }, [isActiveId])
+    if (isInitialized) {
+      saveToSessionStorage("codeTabs", tabs)
+    }
+  }, [tabs, isInitialized])
+
+  // Save theme to sessionStorage whenever theme changes
+  useEffect(() => {
+    if (isInitialized) {
+      saveToSessionStorage("codeTheme", theme)
+    }
+  }, [theme, isInitialized])
+
+  // Save active tab ID to sessionStorage whenever it changes
+  useEffect(() => {
+    if (isInitialized) {
+      saveToSessionStorage("activeTabId", isActiveId)
+    }
+  }, [isActiveId, isInitialized])
 
   useEffect(() => {
     const handleCodeChange = (msg) => {
       if (Array.isArray(msg)) {
         setTabs(msg)
+        // Don't save to sessionStorage here as it will be saved by the useEffect above
       } else {
         console.error("Received non-array message:", msg)
       }
@@ -213,6 +144,12 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
     }
   }, [socketRef.current])
 
+  useEffect(() => {
+    if (isInitialized && onCodeChange) {
+      onCodeChange(tabs)
+    }
+  }, [tabs, isInitialized, onCodeChange])
+
   const handleChange = (e) => {
     const { name, value } = e.target
 
@@ -220,7 +157,6 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
     if (name === "lang") {
       const activeTab = tabs.find((tab) => tab.id === isActiveId)
 
-      // Store the current language before changing
       setPreviousLang(activeTab.lang)
 
       if (activeTab?.code && activeTab?.code.trim() !== "" && activeTab?.code !== boilerplateCode[activeTab.lang]) {
@@ -229,18 +165,16 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
         )
 
         if (confirmChange) {
-          // Update the language and load boilerplate
           setTabs((prevTabs) => {
             const codingText = prevTabs.map((tab) =>
               tab.id === isActiveId ? { ...tab, [name]: value, code: boilerplateCode[value] || "" } : tab,
             )
-            socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
-            onCodeChange(codingText)
+            if (socketRef.current) {
+              socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
+            }
             return codingText
           })
         } else {
-          // If user cancels, revert the select element to the previous language
-          // We need to use setTimeout to ensure this happens after the current event loop
           setTimeout(() => {
             const selectElement = document.querySelector('select[name="lang"]')
             if (selectElement) {
@@ -248,17 +182,16 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
             }
           }, 0)
 
-          // Return early to prevent further processing
           return
         }
       } else {
-        // If there's no meaningful code, just change the language and load boilerplate
         setTabs((prevTabs) => {
           const codingText = prevTabs.map((tab) =>
             tab.id === isActiveId ? { ...tab, [name]: value, code: boilerplateCode[value] || "" } : tab,
           )
-          socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
-          onCodeChange(codingText)
+          if (socketRef.current) {
+            socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
+          }
           return codingText
         })
       }
@@ -266,8 +199,9 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
       // For other changes (not language)
       setTabs((prevTabs) => {
         const codingText = prevTabs.map((tab) => (tab.id === isActiveId ? { ...tab, [name]: value } : tab))
-        socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
-        onCodeChange(codingText)
+        if (socketRef.current) {
+          socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
+        }
         return codingText
       })
     }
@@ -277,8 +211,9 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
     setTabs((prevTabs) => {
       const codingText = prevTabs.map((tab) => (tab.id === isActiveId ? { ...tab, code: value } : tab))
       // Emit the updated tabs array to the socket
-      socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
-      onCodeChange(codingText)
+      if (socketRef.current) {
+        socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
+      }
       return codingText
     })
   }
@@ -287,14 +222,15 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
     const value = e.target.value
     setTabs((prevTabs) => {
       const codingText = prevTabs.map((tab) => (tab.id === isActiveId ? { ...tab, input: value } : tab))
-      socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
-      onCodeChange(codingText)
+      if (socketRef.current) {
+        socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
+      }
       return codingText
     })
   }
 
   const addTab = () => {
-    const newId = tabs.length > 0 ? tabs[tabs.length - 1].id + 1 : 1
+    const newId = tabs.length > 0 ? Math.max(...tabs.map(tab => tab.id)) + 1 : 1
     const defaultLang = "javascript"
     const newTab = {
       id: newId,
@@ -306,28 +242,42 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
     setTabs((prevTabs) => {
       const codingText = [...prevTabs, newTab]
       setIsActiveId(newId)
-      socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
+      if (socketRef.current) {
+        socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
+      }
       return codingText
     })
   }
 
   const removeTab = (id) => {
-    setTabs((prev) => {
-      const codingText = tabs.filter((tab) => tab.id !== id)
-      if (codingText.length === 0) {
-        setIsActiveId(null)
-      } else if (id === isActiveId) {
-        setIsActiveId(codingText[0].id)
+    if (tabs.length <= 1) {
+      toast.warning("Cannot remove the last tab")
+      return
+    }
+
+    setTabs((prevTabs) => {
+      const codingText = prevTabs.filter((tab) => tab.id !== id)
+      
+      // Update active tab if the removed tab was active
+      if (id === isActiveId) {
+        const activeIndex = prevTabs.findIndex(tab => tab.id === id)
+        const newActiveId = activeIndex > 0 
+          ? prevTabs[activeIndex - 1].id 
+          : codingText[0]?.id
+        setIsActiveId(newActiveId)
       }
 
-      socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
-      onCodeChange(codingText)
+      if (socketRef.current) {
+        socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
+      }
       return codingText
     })
   }
 
   const downloadFile = () => {
     const activeTab = tabs.find((tab) => tab.id === isActiveId)
+    if (!activeTab) return
+
     const blob = new Blob([activeTab.code], { type: "text/plain" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
@@ -342,6 +292,8 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
 
   const runCode = async () => {
     const activeTab = tabs.find((tab) => tab.id === isActiveId)
+    if (!activeTab) return
+
     setOutput("Running code...")
     setIsRunning(true)
 
@@ -369,22 +321,13 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
     }
   }
 
-  const loadBoilerplate = () => {
-    const activeTab = tabs.find((tab) => tab.id === isActiveId)
-    if (activeTab && boilerplateCode[activeTab.lang]) {
-      setTabs((prevTabs) => {
-        const codingText = prevTabs.map((tab) =>
-          tab.id === isActiveId ? { ...tab, code: boilerplateCode[tab.lang] } : tab,
-        )
-        socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, codingText })
-        onCodeChange(codingText)
-        return codingText
-      })
-      toast.info(`Loaded ${activeTab.lang} boilerplate code`)
-    }
-  }
 
   const activeTab = Array.isArray(tabs) ? tabs.find((tab) => tab.id === isActiveId) : null
+
+  // Don't render until initialized to prevent flash of default content
+  if (!isInitialized) {
+    return <div className="codeeditor">Loading...</div>
+  }
 
   return (
     <div className="codeeditor">
@@ -394,7 +337,7 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
             type="text"
             id="codeheading"
             name="heading"
-            value={activeTab?.heading}
+            value={activeTab?.heading || ""}
             onChange={handleChange}
             placeholder="Enter code title here..."
           />
@@ -411,7 +354,7 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
             </select>
           </div>
           <div className="langwrap">
-            <select name="lang" onChange={handleChange} value={activeTab?.lang}>
+            <select name="lang" onChange={handleChange} value={activeTab?.lang || "javascript"}>
               {Object.keys(languages).map((langKey) => (
                 <option key={langKey} value={langKey}>
                   {langKey.charAt(0).toUpperCase() + langKey.slice(1)}
@@ -451,9 +394,11 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
                   <span className="lang-indicator" style={{ backgroundColor: getLangColor(tab.lang) }}></span>
                   {tab.heading.length > 15 ? tab.heading.substring(0, 15) + "..." : tab.heading}
                 </button>
-                <button onClick={() => removeTab(tab.id)} className="close-btn">
-                  <i className="fa-solid fa-xmark"></i>
-                </button>
+                {tabs.length > 1 && (
+                  <button onClick={() => removeTab(tab.id)} className="close-btn">
+                    <i className="fa-solid fa-xmark"></i>
+                  </button>
+                )}
               </div>
             ))}
           <button onClick={addTab} className="addbtn">
