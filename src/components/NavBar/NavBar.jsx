@@ -28,8 +28,14 @@ const NavBar = () => {
       return () => clearTimeout(timeout);
   }, [loading]);
   useEffect(() => {
+
+    const alertSmallWidth = sessionStorage.getItem("alertSmallWidth");
+    
     if (window.innerWidth < 996) {
-      toast.warn("📱 For the best experience, please use a larger screen.");
+      if (!alertSmallWidth) {
+        toast.warn("📱 For the best experience, please use a larger screen.");
+        sessionStorage.setItem("alertSmallWidth", "width is Too Small!");
+      }
     }
   }, []);
   return (
